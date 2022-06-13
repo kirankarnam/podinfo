@@ -2,8 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "podinfo.fullname" . }}
+  namespace: ngcc-user
   labels:
     {{- include "podinfo.labels" . | nindent 4 }}
+    aceId: "12554"
+    job_priority_level: normal
+    job_priority_order: "50"
+    ngcjob-name: "1256335"
+    nodeInstance: dgx1v.16g.8.norm
+  annotations:
+    jobRunPolicy.MinTimesliceSeconds: "3600"
+    jobRunPolicy.PreemptClass: RUNONCE
+    jobRunPolicy.TotalRuntimeSeconds: "3600"
+    ngcJobName: "1256335"
+    orgName: nvidia
+    resubmitCount: "0"
+    teamName: baremetal-army-sjc4
+    userId: "45782"
 spec:
   {{- if not .Values.hpa.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -26,6 +41,7 @@ spec:
         {{ $key }}: {{ $value | quote }}
         {{- end }}
     spec:
+      schedulerName: "podgroup-scheduler"
       terminationGracePeriodSeconds: 30
       {{- if .Values.serviceAccount.enabled }}
       serviceAccountName: {{ template "podinfo.serviceAccountName" . }}
